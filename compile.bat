@@ -22,5 +22,5 @@ copy dist\number_counter.exe c:\users\user\desktop
 del number_counter.spec
 )
 
-rmdir /s /q build
+:: rmdir /s /q build
 

