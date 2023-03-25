@@ -1,12 +1,11 @@
 TO DO:
+make sending reverse message to a separate function
+
 module loading
-return result of command executing to server
 unicode
 refactor main.py
 
 user-friendly cli
 keylogger (as module)
+victim's config editing
 refactor project
-
-BUGS:
-closing connections server.py
