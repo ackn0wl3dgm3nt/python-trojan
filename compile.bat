@@ -1,7 +1,7 @@
 @echo off
 
 if "%1" == "payload" (
-pyinstaller --hiddenimport win32timezone --onefile --name payload main.py
+pyinstaller --hiddenimport win32timezone --onefile --name payload payload.py
 del payload.spec
 )
 

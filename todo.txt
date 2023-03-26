@@ -1,5 +1,4 @@
 TO DO:
-make sending reverse message to a separate function
 
 module loading
 unicode
