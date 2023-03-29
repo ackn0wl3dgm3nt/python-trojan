@@ -1,7 +1,7 @@
 # Newton RAT
 Newton RAT is a malware written in Python and purposed for remote access to victim's PC
 
-The Malware is written to show how malware can work and how to deal with it
+The Malware is developed to show how malware can work and how to deal with it
 
 ## What can Hewton RAT do?
 As said above, Hewton RAT is a remote access tool, so malware operator can manage victim's PC
