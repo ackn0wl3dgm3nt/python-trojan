@@ -7,9 +7,6 @@ class Config:
     def __init__(self, winreg_key):
         self.registry = Registry(winreg_key)
 
-    # def __call__(self, *args, **kwargs):
-    #     return self.get()
-
     def get(self):
         return DotMap(json.loads(self.registry.get_value("config")))
 
