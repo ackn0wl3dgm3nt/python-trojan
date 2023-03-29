@@ -1,10 +1,9 @@
 TO DO:
-
+victim's config editing
 module loading
-unicode
-refactor main.py
+unicode support
 
 user-friendly cli
 keylogger (as module)
-victim's config editing
 refactor project
+
