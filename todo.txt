@@ -1,10 +1,11 @@
 TO DO:
-victim's config editing
 module loading
-unicode support
-
-user-friendly cli
-keylogger (as module)
+  - create another socket for module loading
+loader
 refactor project
+keylogger (as module)
 readme.md
+
+BUGS:
+spaces in path raise error
 

