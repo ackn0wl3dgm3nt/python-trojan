@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/Python Malware.iml" filepath="$PROJECT_DIR$/.idea/Python Malware.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../Sending File/.idea/Sending File.iml" filepath="$PROJECT_DIR$/../Sending File/.idea/Sending File.iml" />
     </modules>
   </component>
 </project>

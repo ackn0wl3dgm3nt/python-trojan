@@ -1,6 +1,5 @@
 import json
 from local_libs.winregistry import Registry
-# from winregistry import Registry
 
 
 class Config:
@@ -21,6 +20,3 @@ def parse_config(filepath):
     with open(filepath) as f:
         return json.dumps(json.load(f), indent=0).replace("\n", "").replace(" ", "")
 
-
-# config = Config("MALWARE")
-# print(config.master_server)

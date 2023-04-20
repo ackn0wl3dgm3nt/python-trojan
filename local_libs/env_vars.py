@@ -1,9 +1,10 @@
 
-DEFAULT_SERVER_IP        = "192.168.0.101"
-DEFAULT_SERVER_PORT      = 8888
+SERVER_IP         = "192.168.0.101"
+SERVER_PORT       = 8888
 
-DEFAULT_MALWARE_PATH     = "C:\\Windows\\System32\\NewtonRAT"
-DEFAULT_MALWARE_FILENAME = "malware"
-DEFAULT_REG_KEY          = "SOFTWARE\\MALWARE"
+MALWARE_PATH     = "C:\\Windows\\System32\\NewtonRAT\\"
+LOADER_FILENAME  = "malware"
+PAYLOAD_FILENAME = "es32"
+REG_KEY          = "SOFTWARE\\MALWARE"
 
-DEFAULT_CONFIG           = ""
+DEFAULT_CONFIG   = "{\"master_server\":{\"ip\":\"192.168.0.101\",\"port\":8888}}"

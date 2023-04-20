@@ -6,6 +6,4 @@ refactor project
 keylogger (as module)
 readme.md
 
-BUGS:
-spaces in path raise error
-
+BUGS: -

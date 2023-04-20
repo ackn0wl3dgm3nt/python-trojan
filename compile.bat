@@ -1,4 +1,5 @@
 @echo off
+title Compiling...
 
 if "%1" == "payload" (
 pyinstaller --hiddenimport win32timezone --onefile --name payload payload.py
@@ -16,10 +17,17 @@ pyinstaller --clean --onefile --noconsole --name %destination_filename% %source_
 del %destination_filename%.spec
 )
 
-if "%1" == "number_counter" (
-pyinstaller --onefile --noconsole number_counter.py
-copy dist\number_counter.exe c:\users\user\desktop
-del number_counter.spec
+if "%1" == "project" (
+compile payload
+cls
+compile loader
+cls
+echo Project compiled!
+)
+
+if "%1" == "server" (
+echo "Server compiled!"
 )
 
 :: rmdir /s /q build
+title cmd.exe

