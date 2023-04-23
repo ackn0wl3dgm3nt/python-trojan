@@ -7,7 +7,7 @@ class Config:
         self.registry = Registry(winreg_key)
 
     def get(self):
-        return json.loads(json.loads(self.registry.get_value("config")))
+        return json.loads(self.registry.get_value("config"))
 
     def set(self, new_value):
         self.registry.set_value("config", json.dumps(new_value))

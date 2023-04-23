@@ -1,9 +1,7 @@
 TO DO:
+readme.md
 module loading
   - create another socket for module loading
-loader
-refactor project
 keylogger (as module)
-readme.md
 
 BUGS: -
