@@ -1,7 +1,5 @@
 TO DO:
-readme.md
-module loading
-  - create another socket for module loading
+module loading (create another socket for module loading in thread)
 keylogger (as module)
 
 BUGS: -
