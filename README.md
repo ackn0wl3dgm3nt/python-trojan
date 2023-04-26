@@ -24,12 +24,21 @@ You need to enter command number to execute the command
 ## How does it work?
 ![Scheme of the malware work](readme/how_it_works.png)
 
-There are 2 classes (***CLI*** and ***Server***) on the ***server side*** and 1 class (***Backdoor***) on the ***client side***.
+There are 2 main classes (***CLI*** and ***Server***) on the ***server side*** 
+and 1 main class (***Backdoor***) on the ***client side***.
 
 - CLI (*main thread*) sends commands to Backdoor
 - acceptings_victims *thread* accepts new victims
 - check_available_victims *thread* checks is victims available
 
+You can check how it works on the video [link](https://youtu.be/JAEwzAu24ac)
 
-## How to delete Hewton RAT?
-Lorem ipsum dolor sit amet.
+## Compilation
+You should set up project variables in local_libs/env_vars.py file and change default values
+
+1. For server: `compile server`
+2. For malware: `compile malware`
+
+## How to remove Hewton RAT?
+Removing the malware is pretty easy because service permissions are not set up when malware installed. 
+Therefore, you just need to stop the malicious process in the process manager running with administrator rights.
