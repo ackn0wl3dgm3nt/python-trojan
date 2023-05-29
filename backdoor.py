@@ -110,6 +110,7 @@ class CommandHandler:
             self.__execute_shell(command)
 
     def __execute_shell(self, command):
+        command = command.replace("/", "\\")
         try:
             if command.find("cd") == 0:
                 os.chdir(command[3:])
